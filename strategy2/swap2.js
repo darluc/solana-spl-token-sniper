@@ -53,7 +53,7 @@ function swapOnlyAmmWithJito(input) {
             fixedSide: 'in',
             makeTxVersion: config_1.makeTxVersion,
         });
-        return { txids: yield (0, util_1.buildAndSendTx)(innerTransactions) };
+        return { txids: yield (0, util_1.buildAndSendTxWithJito)(innerTransactions) };
     });
 }
 
@@ -89,7 +89,6 @@ function swap(poolKeys, signature) {
 
 function swapWithJito(poolKeys, signature) {
     return __awaiter(this, void 0, void 0, function* () {
-        const ownerAddress = config_1.ownerAddress;
         const inputToken = new raydium_sdk_1.Token(raydium_sdk_1.TOKEN_PROGRAM_ID, new web3_js_1.PublicKey('So11111111111111111111111111111111111111112'), 9, 'WSOL', 'WSOL'); // WSOL
         const inputTokenAmount = new raydium_sdk_1.TokenAmount(inputToken, LAMPORTS_PER_SOL * buyAmtSol);
         const slippage = new raydium_sdk_1.Percent(1, 100);
@@ -104,9 +103,6 @@ function swapWithJito(poolKeys, signature) {
         }).then(({ txids }) => {
             /** continue with txids */
             console.log('txids', txids);
-            if(txids.length === 1){
-                monitorTokenSell(txids[0], poolKeys.baseMint.toString(), ownerAddress, poolKeys.baseVault.toString(), poolKeys.quoteVault.toString());
-            }
         }).catch(error => {
             console.log(signature);
             console.log(error);

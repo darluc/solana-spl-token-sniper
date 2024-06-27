@@ -70,7 +70,7 @@ function buildAndSendTxWithJito(innerSimpleV0Transaction, options) {
             const txids = []; // TODO: it's an array of booleans
             for (const iTx of willSendTx) {
                 // TODO: fee 0.01 SOL
-                txids.push(yield jito.createAndSendBundleTransaction(config_1.connection, 0.01, [iTx], config_1.wallet))
+                txids.push(yield jito.createAndSendBundleTransaction(config_1.jitoConnection, 0.01, [iTx], config_1.wallet))
             }
             return txids;
         });

@@ -21,7 +21,7 @@ const ws = new WebSocket(config.websocketConnection)
 
 ws.on('message', (evt) => {
     try {
-        console.log(evt)
+        console.log("mesage received")
         const buffer = evt.toString('utf8');
         parseTxs(JSON.parse(buffer));
         return;
@@ -60,6 +60,7 @@ function parseLogs(logs){
         }
     }
     if(invoke === 1 && consumed === 1 && success === 1){
+        console.log("parse logs returned true")
         return true;
     } else{
         return false;
@@ -79,12 +80,18 @@ async function parseAccountKeys(keys, signature){
             hitTarget = true;
         }
     }
+
     if(marketId === null){
         console.log("call parseAccountKeys again");
         parseAccountKeys(keys);
     } else{
-        const poolKeys = await derivePoolKeys.derivePoolKeys(marketId);
-        // swap.swap(poolKeys, signature);
-        swap.loopSwap(poolKeys, signature);
+        if (hitTarget){
+            console.log("hit target", signature);
+            const poolKeys = await derivePoolKeys.derivePoolKeys(marketId);
+            // swap.swap(poolKeys, signature);
+            swap.loopSwap(poolKeys, signature);
+        } else {
+            console.log("not hit target", signature, keys);
+        }
     }
 }
