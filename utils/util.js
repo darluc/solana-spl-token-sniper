@@ -55,6 +55,29 @@ function buildAndSendTx(innerSimpleV0Transaction, options) {
     });
 }
 exports.buildAndSendTx = buildAndSendTx;
+
+const jito = require('jito-kit');
+function buildAndSendTxWithJito(innerSimpleV0Transaction, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const willSendTx = yield (0, raydium_sdk_1.buildSimpleTransaction)({
+            connection: config_1.connection,
+            makeTxVersion: config_1.makeTxVersion,
+            payer: config_1.wallet.publicKey,
+            innerTransactions: innerSimpleV0Transaction,
+            addLookupTableInfo: config_1.addLookupTableInfo,
+        });
+        return  yield __awaiter(this, void 0, void 0, function* () {
+            const txids = []; // TODO: it's an array of booleans
+            for (const iTx of willSendTx) {
+                // TODO: fee 0.01 SOL
+                txids.push(yield jito.createAndSendBundleTransaction(config_1.connection, 0.01, [iTx], config_1.wallet))
+            }
+            return txids;
+        });
+    });
+}
+exports.buildAndSendTxWithJito = buildAndSendTxWithJito;
+
 function getATAAddress(programId, owner, mint) {
     const { publicKey, nonce } = (0, raydium_sdk_1.findProgramAddress)([owner.toBuffer(), programId.toBuffer(), mint.toBuffer()], new web3_js_1.PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"));
     return { publicKey, nonce };

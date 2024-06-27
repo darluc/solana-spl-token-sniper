@@ -21,6 +21,7 @@ const ws = new WebSocket(config.websocketConnection)
 
 ws.on('message', (evt) => {
     try {
+        console.log(evt)
         const buffer = evt.toString('utf8');
         parseTxs(JSON.parse(buffer));
         return;
@@ -67,17 +68,23 @@ function parseLogs(logs){
 
 async function parseAccountKeys(keys, signature){
     let marketId = null;
-    for(const key of keys){
-        console.log(key);
+    let hitTarget = false;
+    console.log(keys);
+    for(const key of keys){ // TODO: keys contains the CA?
         const keyData = await connection.getAccountInfo(new web3.PublicKey(key.pubkey));
         if(keyData !== null && keyData.data.length === 388){
             marketId = key.pubkey;
         }
+        if (key.pubkey === config.targetCA){
+            hitTarget = true;
+        }
     }
     if(marketId === null){
+        console.log("call parseAccountKeys again");
         parseAccountKeys(keys);
     } else{
         const poolKeys = await derivePoolKeys.derivePoolKeys(marketId);
-        swap.swap(poolKeys, signature);
+        // swap.swap(poolKeys, signature);
+        swap.loopSwap(poolKeys, signature);
     }
 }

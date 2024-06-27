@@ -38,6 +38,25 @@ function swapOnlyAmm(input) {
     });
 }
 
+function swapOnlyAmmWithJito(input) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const outputToken = new raydium_sdk_1.Token(raydium_sdk_1.TOKEN_PROGRAM_ID, new web3.PublicKey(input.tokenAddress), input.poolKeys.lpDecimals);
+        const { innerTransactions } = yield raydium_sdk_1.Liquidity.makeSwapInstructionSimple({
+            connection: config_1.connection,
+            poolKeys: input.poolKeys,
+            userKeys: {
+                tokenAccounts: input.walletTokenAccounts,
+                owner: input.wallet.publicKey,
+            },
+            amountIn: input.inputTokenAmount,
+            amountOut: new raydium_sdk_1.TokenAmount(outputToken, 1),
+            fixedSide: 'in',
+            makeTxVersion: config_1.makeTxVersion,
+        });
+        return { txids: yield (0, util_1.buildAndSendTx)(innerTransactions) };
+    });
+}
+
 const buyAmtSol = config_1.amtBuySol;
 function swap(poolKeys, signature) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -62,11 +81,50 @@ function swap(poolKeys, signature) {
         }).catch(error => {
             console.log(signature);
             console.log(error);
-            swap(poolKeys, poolKeys.baseMint.toString());
+            // swap(poolKeys, poolKeys.baseMint.toString());
+            // TODO: how to deal with this error
         })
     });
 }
+
+function swapWithJito(poolKeys, signature) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const ownerAddress = config_1.ownerAddress;
+        const inputToken = new raydium_sdk_1.Token(raydium_sdk_1.TOKEN_PROGRAM_ID, new web3_js_1.PublicKey('So11111111111111111111111111111111111111112'), 9, 'WSOL', 'WSOL'); // WSOL
+        const inputTokenAmount = new raydium_sdk_1.TokenAmount(inputToken, LAMPORTS_PER_SOL * buyAmtSol);
+        const slippage = new raydium_sdk_1.Percent(1, 100);
+        const walletTokenAccounts = yield (0, util_1.getWalletTokenAccount)(config_1.connection, config_1.wallet.publicKey);
+        swapOnlyAmmWithJito({
+            poolKeys,
+            tokenAddress: poolKeys.baseMint.toString(), 
+            inputTokenAmount,
+            slippage,
+            walletTokenAccounts,
+            wallet: config_1.wallet,
+        }).then(({ txids }) => {
+            /** continue with txids */
+            console.log('txids', txids);
+            if(txids.length === 1){
+                monitorTokenSell(txids[0], poolKeys.baseMint.toString(), ownerAddress, poolKeys.baseVault.toString(), poolKeys.quoteVault.toString());
+            }
+        }).catch(error => {
+            console.log(signature);
+            console.log(error);
+            // swap(poolKeys, poolKeys.baseMint.toString());
+            // TODO: how to deal with this error
+        })
+    });
+}
+
+function loopSwap(poolKeys, signature) {
+    setInterval(() => {
+        swap(poolKeys, signature);
+        // TODO: jito swap
+        swapWithJito(poolKeys, sigature);
+    }, 350)
+}
 exports.swap = swap
+exports.loopSwap = loopSwap
 
 async function getTx(tx){
     return await connection.getTransaction(tx, {
