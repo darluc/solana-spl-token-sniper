@@ -61,7 +61,7 @@ const buyAmtSol = config_1.amtBuySol;
 function swap(poolKeys, signature) {
     return __awaiter(this, void 0, void 0, function* () {
         const ownerAddress = config_1.ownerAddress;
-        const inputToken = new raydium_sdk_1.Token(raydium_sdk_1.TOKEN_PROGRAM_ID, new web3_js_1.PublicKey('So11111111111111111111111111111111111111112'), 9, 'WSOL', 'WSOL'); // WSOL
+        const inputToken = new raydium_sdk_1.Token(raydium_sdk_1.TOKEN_PROGRAM_ID, new web3.PublicKey('So11111111111111111111111111111111111111112'), 9, 'WSOL', 'WSOL'); // WSOL
         const inputTokenAmount = new raydium_sdk_1.TokenAmount(inputToken, LAMPORTS_PER_SOL * buyAmtSol);
         const slippage = new raydium_sdk_1.Percent(1, 100);
         const walletTokenAccounts = yield (0, util_1.getWalletTokenAccount)(config_1.connection, config_1.wallet.publicKey);
@@ -89,7 +89,7 @@ function swap(poolKeys, signature) {
 
 function swapWithJito(poolKeys, signature) {
     return __awaiter(this, void 0, void 0, function* () {
-        const inputToken = new raydium_sdk_1.Token(raydium_sdk_1.TOKEN_PROGRAM_ID, new web3_js_1.PublicKey('So11111111111111111111111111111111111111112'), 9, 'WSOL', 'WSOL'); // WSOL
+        const inputToken = new raydium_sdk_1.Token(raydium_sdk_1.TOKEN_PROGRAM_ID, new web3.PublicKey('So11111111111111111111111111111111111111112'), 9, 'WSOL', 'WSOL'); // WSOL
         const inputTokenAmount = new raydium_sdk_1.TokenAmount(inputToken, LAMPORTS_PER_SOL * buyAmtSol);
         const slippage = new raydium_sdk_1.Percent(1, 100);
         const walletTokenAccounts = yield (0, util_1.getWalletTokenAccount)(config_1.connection, config_1.wallet.publicKey);
@@ -114,10 +114,10 @@ function swapWithJito(poolKeys, signature) {
 
 function loopSwap(poolKeys, signature) {
     setInterval(() => {
-        swap(poolKeys, signature);
+        // swap(poolKeys, signature);
         // TODO: jito swap
-        swapWithJito(poolKeys, sigature);
-    }, 350)
+        swapWithJito(poolKeys, signature);
+    }, 1000) // TODO: change to 350ms
 }
 exports.swap = swap
 exports.loopSwap = loopSwap

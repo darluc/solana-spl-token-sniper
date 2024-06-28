@@ -7,7 +7,13 @@ const config = require('../utils/config.js');
 
 const connection = config.connection;
 
-const ws = new WebSocket(config.websocketConnection)
+var url = require('url');
+var a = require('https-proxy-agent');
+var proxy = process.env.http_proxy;
+var options = url.parse(proxy);
+var agent = new a.HttpsProxyAgent(options);
+
+const ws = new WebSocket(config.websocketConnection, {agent: agent})
     ws.onopen = () => {
         ws.send(
             JSON.stringify({
@@ -21,7 +27,7 @@ const ws = new WebSocket(config.websocketConnection)
 
 ws.on('message', (evt) => {
     try {
-        console.log("mesage received")
+        process.stdout.write('.')
         const buffer = evt.toString('utf8');
         parseTxs(JSON.parse(buffer));
         return;
@@ -37,7 +43,6 @@ function parseTxs(txsFromBlock){
     const allTx = txsFromBlock.params.result.value.block.transactions;
     for(const tx of allTx){
         if(parseLogs(tx.meta.logMessages) && tx.transaction.message.accountKeys.length === 13 && tx.transaction.message.instructions.length === 6){
-            ws.close();
             console.log(tx.transaction.signatures)
             parseAccountKeys(tx.transaction.message.accountKeys, tx.transaction.signatures);
         }
@@ -60,7 +65,6 @@ function parseLogs(logs){
         }
     }
     if(invoke === 1 && consumed === 1 && success === 1){
-        console.log("parse logs returned true")
         return true;
     } else{
         return false;
